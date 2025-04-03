@@ -7,6 +7,46 @@ import numpy as np
 import pymysql
 from streamlit_pandas_profiling import st_profile_report
 from ydata_profiling import ProfileReport
+from sklearn.preprocessing import LabelEncoder
+import requests
+import joblib
+import io
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.preprocessing import (
+    LabelEncoder, 
+    StandardScaler,
+    MinMaxScaler,
+    OrdinalEncoder,
+    LabelEncoder,
+    PolynomialFeatures)
+
+from xgboost import XGBClassifier, XGBRegressor
+from sklearn.naive_bayes import GaussianNB
+from scipy.stats import shapiro
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    KFold,
+    StratifiedKFold,
+    GridSearchCV,
+    RandomizedSearchCV,
+    cross_val_score,
+)
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score, confusion_matrix,
+    classification_report, roc_curve, auc, mean_squared_error, r2_score, mean_absolute_error
+)
+import io
+from sklearn.svm import SVC, SVR
+import re
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
+from sklearn.naive_bayes import GaussianNB
+import joblib
+from sklearn.pipeline import make_pipeline
+import time
+from skopt import BayesSearchCV
 
 st.set_page_config(layout="wide")
 
@@ -340,23 +380,6 @@ def classify_categorical_columns(df):
 
     return nominal_features, ordinal_features
 
-username='root'
-host='localhost'
-password='Jsa.5378724253@'.replace('@','%40')
-
-DB_URL = f"mysql+pymysql://{username}:{password}@{host}/office"
-engine = create_engine(DB_URL)
-# -------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------
-global df
-df = pd.DataFrame()
-
-
-
-
-
-
-
 
 
 
@@ -369,8 +392,7 @@ df = pd.DataFrame()
 with st.sidebar:
 
     file_source = st.sidebar.checkbox("Browse Files")
-    db_source = st.sidebar.checkbox("Fetch Data from Database")
-    google_api=st.sidebar.checkbox("Fetch data with GoogleApi")
+    
     st.markdown('---------------------------------------------------------------------------------------------------------------------------------------------------------')
 # List to store DataFrames from both sources
 dataframes = []
@@ -443,77 +465,6 @@ if file_source:
                         dataframes.append(df)
                         st.sidebar.success(f"Loaded file: {file.name}")
 
-# Handle Database Integration
-if db_source:
-    st.subheader("MySQL Database Connection")
-    host = st.text_input("Host", value="localhost")
-    user = st.text_input("User", value="root")
-    password = st.text_input("Password", type="password")
-    database = st.text_input("Database Name")
-    query = st.text_area("Enter the SQL query to fetch data:")
-
-    if st.button("Fetch Data"):
-        if host and user and password and database and query:
-            df = fetch_data_from_mysql(host, user, password, database, query)
-            csv_data = df.to_csv(index=False)
-            st.download_button(
-                label="📥 Download Processed Data",
-                data=csv_data,
-                file_name="Database_file.csv",
-                mime="text/csv",
-            )
-            if df is not None:
-                dataframes.append(df)
-                st.success("Data fetched successfully from the database.")
-        else:
-            st.error(
-                "Please provide all the required database connection details and SQL query."
-            )
-
-if google_api:
-    query=st.text_input('Give query')
-    api_key = "AIzaSyDGSGdgEh4FTFKB1KCnh3NYGM2mxQsfmKo"
-    if query and api_key:
-        with st.spinner("Fetching books..."):
-            books = fetch_books(query, api_key, max_books=1000)
-            if books:
-                book_info = extract_book_info(books, query)
-
-                # Convert to DataFrame
-                df = pd.DataFrame(book_info)
-
-                st.success(f"Fetched {len(df)} books for the query: '{query}'")
-                st.dataframe(df)
-
-                # Convert DataFrame to CSV for download
-                csv_data = df.to_csv(index=False).encode('utf-8')
-
-                st.download_button(
-                    label="⬇️ Download Book Data as CSV",
-                    data=csv_data,
-                    file_name=f"{query}_books.csv",
-                    mime="text/csv"
-                )
-            else:
-                st.warning("No books found for the given query.")
-    else:
-        st.warning("Please enter both the search query and API key.")
-
-# Combine DataFrames if available
-if dataframes:
-    df = pd.concat(dataframes, ignore_index=True)
-
-    # Download option
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.sidebar.download_button(
-        "Download Combined Data", csv, "combined_data.csv", "text/csv"
-    )
-
-
-
-
-
-
 
 
 
@@ -563,12 +514,7 @@ if st.session_state["page"] == "Home":
         if st.button("Exploratory Data Analyse"):
                 navigate_to("EDA")
 
-        st.image(
-            r"https://cdn-icons-png.flaticon.com/512/11331/11331293.png",
-            use_container_width=True,
-        )
-        if st.button("Anomaly Detection", use_container_width=True):
-            navigate_to("Anomaly Detection")
+        
 
         st.image(
             r"https://cdn-icons-png.flaticon.com/512/7012/7012934.png",
@@ -589,18 +535,29 @@ if st.session_state["page"] == "Home":
 
     with col2:
         st.image(
-            r"https://cdn4.iconfinder.com/data/icons/human-resources-money-market-payment-method/66/29-512.png",
+            r"https://cdn-icons-png.flaticon.com/512/1118/1118881.png",
             use_container_width=True,
         )
-        if st.button("Insurance Risk & Claim", use_container_width=True):
-            navigate_to("Insurance Risk & Claim")
+        
+        if st.button("Model Selection", use_container_width=True):
+            navigate_to("Model Selection")
+
 
         st.image(
-            r"https://icon-library.com/images/translate-icon/translate-icon-4.jpg",
+            r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
             use_container_width=True,
         )
-        if st.button("Translation & Summarization", use_container_width=True):
-            navigate_to("Multilingual Insurance Policy")
+        if st.button("Predicting Job Satisfaction", use_container_width=True):
+            navigate_to("Predicting Job Satisfaction")
+
+
+        
+
+
+
+        
+
+        
 
         
         
@@ -610,19 +567,14 @@ if st.session_state["page"] == "Home":
 
     with col3:
         st.image(
-            r"https://static.vecteezy.com/system/resources/previews/041/317/536/original/3d-feedback-icon-on-transparent-background-png.png",
+            r"https://www.r-exercises.com/wp-content/uploads/2016/11/Selecting-a-Real-Estate-Agent-Red.png",
             use_container_width=True,
         )
-        
-        if st.button("Customer Feedback", use_container_width=True):
-            navigate_to("Customer Feedback & Sentiment")
+        if st.button("Predicting Employee Attrition", use_container_width=True):
+            navigate_to("Predicting Employee Attrition")
+      
 
-        st.image(
-            r"https://cdn-icons-png.flaticon.com/512/2761/2761493.png",
-            use_container_width=True,
-        )
-        if st.button("Customer Segmentation & Prediction", use_container_width=True):
-            navigate_to("Customer Segmentation & Prediction")
+       
 
 
 
@@ -683,7 +635,6 @@ elif st.session_state["page"] == "EDA":
             multivariate = st.sidebar.checkbox("Multivariate Analysis")
             feature_selection = st.sidebar.checkbox("Selecting Target & Features")
             feature_scaling = st.sidebar.checkbox("Scaling Recommendation")
-            analysewithsql = st.sidebar.checkbox("Analyse With SQL")
             Full_eda = st.sidebar.checkbox("Automated EDA")
 
             if dataprev:
@@ -1287,37 +1238,7 @@ elif st.session_state["page"] == "EDA":
                     st.write(f"{feature}: {scale_type}")
 
 
-            if analysewithsql:
-                st.subheader('Send Data to SQL')
-                uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
-    
-                if uploaded_file is not None:
-                  df = pd.read_csv(uploaded_file)
-                  st.dataframe(df)
-                  table_name = st.text_input("Enter Table Name", value='project')
-                  if st.button('Send to SQL'):
-                   send_to_sql(df, table_name)
-
-    # Query Database Page
-    # elif st.session_state['page'] == 'Query SQL':
-                st.subheader('Query Database')
-                query = st.text_area("Write your SQL query:")
-                if st.button("Run Query"):
-                 try:
-                  with engine.connect() as conn:
-                   result_df = pd.read_sql(query, conn)
-                   with st.expander('View dataframe'):
-                    st.dataframe(result_df)
-
-                # Pie chart visualization
-                  st.subheader("Pie Chart Visualization")
-                  col_for_pie = st.selectbox("Select a column for pie chart", result_df.columns)
-                
-                  if col_for_pie:
-                     pie_fig = px.pie(result_df, names=col_for_pie, title=f'{col_for_pie} Distribution')
-                     st.plotly_chart(pie_fig)
-                 except Exception as e:
-                  st.error(f"Error executing query: {e}")
+           
 
                 
 
@@ -1332,3 +1253,815 @@ elif st.session_state["page"] == "EDA":
 
         except Exception as e:
             st.warning(f"Please Upload a Dataset {e}")
+
+
+
+
+
+elif st.session_state["page"] == "Model Selection":
+        st.markdown(
+    """
+    <style>
+        .model-selection-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap; /* Ensures it's always on one line */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+            top: -10px; /* Moves text slightly up */
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #0047AB, #007BFF); /* Ocean Blue Gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <div class='model-selection-title'>Model Selection</div>
+    """,
+    unsafe_allow_html=True
+)
+
+        st.write("selecting algorithm for model training")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🔙 Back", use_container_width=True):
+                navigate_to("Home")
+        with col2:
+            if st.button("🏠 Home", use_container_width=True):
+                navigate_to("Home")
+
+        tab1, tab2, tab3 = st.tabs(
+            [
+                "Model Training & Evaluation",
+                "Cross Validation",
+                "Tuning/Generalising",
+                
+            ]
+        )
+
+        selected_features = []
+
+        with tab1:
+            st.title("Automated Model Selection & Evaluation")
+
+# File uploaders
+            features_file = st.file_uploader("Upload your CSV file for features", type=["csv"], key="features")
+            target_file = st.file_uploader("Upload your CSV file for target", type=["csv"], key="target")
+
+            if features_file and target_file:
+                df_features = pd.read_csv(features_file)
+                df_target = pd.read_csv(target_file)
+
+    # Select target column
+                target_column = st.selectbox("Select target column:", df_target.columns)
+
+                if target_column:
+        # Select feature columns
+                    selected_features = st.multiselect(
+                        "Select feature columns (remove unwanted features):",
+                    df_features.select_dtypes(include=[np.number]).columns,
+                    default=[col for col in df_features.select_dtypes(include=[np.number]).columns if col != target_column],
+                    )
+
+                X = df_features[selected_features]
+                y = df_target[target_column]
+
+        # Check if target needs encoding (categorical)
+                if y.dtype == 'object' or y.nunique() <= 10:
+                    le = LabelEncoder()
+                    y_encoded = le.fit_transform(y)
+                    st.info("Categorical target detected - Applied Label Encoding.")
+                    y = pd.Series(y_encoded, name=target_column)
+                    class_names = le.classes_  # Store original class names for display
+                else:
+                    st.info("Numerical target detected - No encoding needed.")
+                    class_names = None
+
+        # Determine problem type
+                unique_values = y.nunique()
+                is_categorical = y.dtype == "object" or unique_values <= 10
+                is_continuous = y.dtype in ["int64", "float64"] and unique_values > 10
+
+                classification_checkbox = st.checkbox("Classification", value=is_categorical)
+                regression_checkbox = st.checkbox("Regression", value=is_continuous)
+
+                if classification_checkbox and not regression_checkbox:
+                    target_type = "classification"
+                elif regression_checkbox and not classification_checkbox:
+                    target_type = "regression"
+                else:
+                    st.warning("Please select only one model type (Classification or Regression).")
+                    st.stop()
+
+        # Train-test split
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                st.info(f"Automatically detected target type: {target_type.capitalize()}")
+
+        # Model selection and evaluation
+                best_model = None
+                best_score = -np.inf
+                best_model_name = ""
+
+                if target_type == "classification":
+                     models = {
+                        "Logistic Regression": LogisticRegression(max_iter=1000),
+                        "Decision Tree Classifier": DecisionTreeClassifier(),
+                        "Random Forest Classifier": RandomForestClassifier(),
+                        "XGBoost Classifier": XGBClassifier(use_label_encoder=False, eval_metric="logloss"),
+                        "Naive Bayes Classifier": GaussianNB(),
+                        "SVM Classifier": SVC(probability=True),
+                    }
+                else:
+                    models = {
+                        "Linear Regression": LinearRegression(),
+                        "Polynomial Regression": make_pipeline(PolynomialFeatures(degree=2), LinearRegression()),
+                        "Ridge Regression": Ridge(),
+                        "Lasso Regression": Lasso(),
+                        "ElasticNet Regression": ElasticNet(),
+                        "SVM Regression": SVR(),
+                        "Decision Tree Regressor": DecisionTreeRegressor(),
+                        "Random Forest Regressor": RandomForestRegressor(),
+                        "XGBoost Regressor": XGBRegressor(),
+                    }
+
+                for model_name, model in models.items():
+                    try:
+                        model.fit(X_train, y_train)
+                        y_pred = model.predict(X_test)
+
+                        if target_type == "classification":
+                            train_score = model.score(X_train, y_train)
+                            test_score = model.score(X_test, y_test)
+                            score_diff = abs(train_score - test_score)
+                            fit_status = "Good Fit" if score_diff <= 0.05 else ("Overfit" if train_score > test_score else "Underfit")
+
+                    # Calculate precision, recall, f1
+                            precision = precision_score(y_test, y_pred, average='weighted')
+                            recall = recall_score(y_test, y_pred, average='weighted')
+                            f1 = f1_score(y_test, y_pred, average='weighted')
+
+                            st.subheader(f"Model: {model_name}")
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Train Score", f"{train_score * 100:.2f}%")
+                            with col2:
+                                st.metric("Test Score", f"{test_score * 100:.2f}%")
+                            with col3:
+                                st.metric("Fit Status", fit_status)
+
+                            st.subheader("Classification Metrics")
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Precision", f"{precision * 100:.2f}%")
+                            with col2:
+                                st.metric("Recall", f"{recall * 100:.2f}%")
+                            with col3:
+                                st.metric("F1 Score", f"{f1 * 100:.2f}%")
+
+                    # Classification Report
+                            st.subheader("Classification Report")
+                            classification_rep = classification_report(y_test, y_pred, output_dict=True)
+                            classification_df = pd.DataFrame(classification_rep).transpose()
+                            st.table(classification_df)
+
+                    # Confusion Matrix
+                            st.subheader("Confusion Matrix")
+                            conf_matrix = confusion_matrix(y_test, y_pred)
+                            fig, ax = plt.subplots()
+                            sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', ax=ax)
+                            ax.set_xlabel('Predicted')
+                            ax.set_ylabel('Actual')
+                            ax.set_title('Confusion Matrix')
+                            st.pyplot(fig)
+
+                    # Confusion Matrix Breakdown
+                            st.subheader("Confusion Matrix Breakdown")
+                            if unique_values == 2:  # Binary classification
+                                tn, fp, fn, tp = conf_matrix.ravel()
+                                confusion_breakdown = {
+                                    "Metric": ["True Positive (TP)", "True Negative (TN)", "False Positive (FP)", "False Negative (FN)"],
+                                    "Count": [tp, tn, fp, fn],
+                                    "Description": [
+                                        "Model correctly predicted the positive class.",
+                                        "Model correctly predicted the negative class.",
+                                        "Model incorrectly predicted the positive class (Type I Error).",
+                                        "Model incorrectly predicted the negative class (Type II Error)."
+                                    ]
+                                }
+                                st.table(pd.DataFrame(confusion_breakdown))
+                            else:  # Multi-class classification
+                                class_labels = np.unique(y_test)
+                                confusion_breakdown = []
+                                for i, true_label in enumerate(class_labels):
+                                    for j, pred_label in enumerate(class_labels):
+                                        count = conf_matrix[i, j]
+                                        if i == j:
+                                            description = f"Model correctly predicted class {true_label}."
+                                        else:
+                                            description = f"Model predicted class {pred_label} when the actual class was {true_label}."
+                                        confusion_breakdown.append({
+                                            "Actual Class": true_label,
+                                            "Predicted Class": pred_label,
+                                            "Count": count,
+                                            "Description": description
+                                        })
+                                st.table(pd.DataFrame(confusion_breakdown))
+
+                    # ROC Curve (for binary classification)
+                            if unique_values == 2 and hasattr(model, "predict_proba"):
+                                y_pred_proba = model.predict_proba(X_test)[:, 1]
+                                fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+                                roc_auc = auc(fpr, tpr)
+
+                                st.subheader("ROC AUC Curve")
+                                fig, ax = plt.subplots()
+                                ax.plot(fpr, tpr, color='blue', lw=2, label=f'ROC Curve (AUC = {roc_auc:.2f})')
+                                ax.plot([0, 1], [0, 1], color='gray', linestyle='--', lw=2, label='Random Guess')
+                                ax.set_xlabel('False Positive Rate (FPR)')
+                                ax.set_ylabel('True Positive Rate (TPR)')
+                                ax.set_title('ROC Curve')
+                                ax.legend(loc="lower right")
+                                st.pyplot(fig)
+
+                                st.info(f"ROC AUC Score: {roc_auc:.2f}")
+                            elif unique_values > 2:
+                                st.warning("ROC Curve is only available for binary classification.")
+
+                    # Download Train and Test Dataset Results
+                            st.subheader("Download Train and Test Dataset Results")
+                            if unique_values == 2:  # Binary classification
+                        # Train dataset results
+                                    train_result_labels = []
+                                    for true, pred in zip(y_train, model.predict(X_train)):
+                                        if true == 1 and pred == 1:
+                                            train_result_labels.append("True Positive")
+                                        elif true == 0 and pred == 0:
+                                            train_result_labels.append("True Negative")
+                                        elif true == 0 and pred == 1:
+                                            train_result_labels.append("False Positive")
+                                        elif true == 1 and pred == 0:
+                                            train_result_labels.append("False Negative")
+
+                                    train_data_with_results = X_train.copy()
+                                    train_data_with_results[target_column] = y_train.values
+                                    train_data_with_results["Predicted"] = model.predict(X_train)
+                                    train_data_with_results["Result"] = train_result_labels
+
+                        # Test dataset results
+                                    test_result_labels = []
+                                    for true, pred in zip(y_test, y_pred):
+                                        if true == 1 and pred == 1:
+                                            test_result_labels.append("True Positive")
+                                        elif true == 0 and pred == 0:
+                                            test_result_labels.append("True Negative")
+                                        elif true == 0 and pred == 1:
+                                            test_result_labels.append("False Positive")
+                                        elif true == 1 and pred == 0:
+                                            test_result_labels.append("False Negative")
+
+                                    test_data_with_results = X_test.copy()
+                                    test_data_with_results[target_column] = y_test.values
+                                    test_data_with_results["Predicted"] = y_pred
+                                    test_data_with_results["Result"] = test_result_labels
+
+                            else:  # Multi-class classification
+                        # Train dataset results
+                                train_result_labels = []
+                                for true, pred in zip(y_train, model.predict(X_train)):
+                                    if true == pred:
+                                        train_result_labels.append(f"Correctly Predicted as {true}")
+                                    else:
+                                        train_result_labels.append(f"Predicted as {pred} (Actual: {true})")
+
+                                train_data_with_results = X_train.copy()
+                                train_data_with_results[target_column] = y_train.values
+                                train_data_with_results["Predicted"] = model.predict(X_train)
+                                train_data_with_results["Result"] = train_result_labels
+
+                        # Test dataset results
+                                test_result_labels = []
+                                for true, pred in zip(y_test, y_pred):
+                                    if true == pred:
+                                        test_result_labels.append(f"Correctly Predicted as {true}")
+                                    else:
+                                        test_result_labels.append(f"Predicted as {pred} (Actual: {true})")
+
+                                test_data_with_results = X_test.copy()
+                                test_data_with_results[target_column] = y_test.values
+                                test_data_with_results["Predicted"] = y_pred
+                                test_data_with_results["Result"] = test_result_labels
+
+                    # Provide download links
+                            st.subheader("Download Train Dataset with Results")
+                            train_buffer = io.BytesIO()
+                            train_data_with_results.to_csv(train_buffer, index=False)
+                            train_buffer.seek(0)
+                            st.download_button(
+                                label=f"Download Train Dataset with Results (CSV) for {model_name}",
+                                data=train_buffer,
+                                file_name="train_dataset_with_results.csv",
+                                mime="text/csv",
+                            )
+
+                            st.subheader("Download Test Dataset with Results")
+                            test_buffer = io.BytesIO()
+                            test_data_with_results.to_csv(test_buffer, index=False)
+                            test_buffer.seek(0)
+                            st.download_button(
+                                label=f"Download Test Dataset with Results (CSV) for {model_name}",
+                                data=test_buffer,
+                                file_name="test_dataset_with_results.csv",
+                                mime="text/csv",
+                            )
+
+                    # Update best model
+                            if test_score > best_score:
+                                best_score = test_score
+                                best_model = model
+                                best_model_name = model_name
+
+                            else:  # Regression
+                                train_score = model.score(X_train, y_train)
+                                test_score = model.score(X_test, y_test)
+                                score_diff = abs(train_score - test_score)
+                                fit_status = "Good Fit" if score_diff <= 0.05 else ("Overfit" if train_score > test_score else "Underfit")
+
+                                r2 = r2_score(y_test, y_pred)
+                                mse = mean_squared_error(y_test, y_pred)
+                                rmse = np.sqrt(mse)
+                                mae = mean_absolute_error(y_test, y_pred)
+
+                                st.subheader(f"Model: {model_name}")
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("Train Score", f"{train_score * 100:.2f}%")
+                                with col2:
+                                    st.metric("Test Score", f"{test_score * 100:.2f}%")
+                                with col3:
+                                    st.metric("Fit Status", fit_status)
+
+                                st.subheader("Regression Metrics")
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("R² Score", f"{r2 * 100:.2f}%")
+                                with col2:
+                                    st.metric("RMSE", f"{rmse:.2f}")
+                                with col3:
+                                    st.metric("MAE", f"{mae:.2f}")
+
+                    # Scatter plot for actual vs predicted values
+                                st.subheader("Actual vs Predicted Values")
+                                fig, ax = plt.subplots()
+                                ax.scatter(y_test, y_pred, alpha=0.5)
+                                ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+                                ax.set_xlabel('Actual')
+                                ax.set_ylabel('Predicted')
+                                ax.set_title('Actual vs Predicted')
+                                st.pyplot(fig)
+
+                    # Residual plot
+                                st.subheader("Residual Plot")
+                                residuals = y_test - y_pred
+                                fig, ax = plt.subplots()
+                                ax.scatter(y_pred, residuals, alpha=0.5)
+                                ax.axhline(y=0, color='r', linestyle='--')
+                                ax.set_xlabel('Predicted Values')
+                                ax.set_ylabel('Residuals')
+                                ax.set_title('Residual Plot')
+                                st.pyplot(fig)
+
+                    # Update best model
+                                if r2 > best_score:
+                                    best_score = r2
+                                    best_model = model
+                                    best_model_name = model_name
+
+                    except Exception as e:
+                        st.warning(f"Error with model {model_name}: {e}")
+
+        # Save the best model
+                if best_model:
+                    joblib.dump(best_model, r'..\Models\best_Algorithm_for_Automated_Model.pkl')
+                    st.success(f"Best Model: {best_model_name} with score: {best_score * 100:.2f}%")
+    # CROSS VALIDATION            
+        with tab2:
+            st.header("Cross-Validation")
+
+            cv_method = st.selectbox(
+                "Choose Cross-Validation Method:", ["K-Fold", "Stratified K-Fold"]
+            )
+            cv_folds = st.slider("Select number of folds:", 2, 10, 5)
+            try:
+                if best_model:
+                    if st.button("Run Cross-Validation"):
+                        try:
+                            cv = (
+                                KFold(n_splits=cv_folds)
+                                if cv_method == "K-Fold"
+                                else StratifiedKFold(n_splits=cv_folds)
+                            )
+                            scores = cross_val_score(best_model, X, y, cv=cv)
+                            score_std = np.std(scores)
+
+                            st.info(f"Cross-Validation Scores: {scores}")
+                            st.success(f"Mean Score: {np.mean(scores) * 100:.2f}%")
+                            st.info(f"Standard Deviation: {score_std * 100:.2f}%")
+
+                            if score_std * 100 < 2:
+                                st.success(
+                                    "Low variance — Model is stable and generalizing well!"
+                                )
+                            elif score_std * 100 <= 5:
+                                st.warning(
+                                    "Moderate variance — Model might be slightly sensitive to data splits."
+                                )
+                            else:
+                                st.error(
+                                    "High variance — Model might be unstable. Consider tuning or regularization."
+                                )
+                        except Exception as e:
+                            st.error(f"Error during cross-validation: {e}")
+            except Exception as e:
+                st.warning(f"Please Upload a Dataset {e}")
+
+        with tab3:
+            st.header("Hyperparameter Tuning")
+            # search_method = st.selectbox(
+            #     "Choose search method:",
+            #     ["Grid Search", "Random Search", "Bayesian Optimization"],
+            # )
+            try:
+                # Hyperparameter tuning for the best model
+                if best_model:
+                    param_grid = {}
+
+    # Hyperparameter grids for classification models
+                    if target_type == "classification":
+                        if best_model_name == "Logistic Regression":
+                            param_grid = {
+                                "C": [0.01, 0.1, 1, 10],
+                                "solver": ["liblinear", "lbfgs"],
+                                "max_iter": [100, 200, 500],
+                            }
+                        elif best_model_name == "Decision Tree Classifier":
+                            param_grid = {
+                                "max_depth": [None, 10, 20, 30],
+                                "min_samples_split": [2, 5, 10],
+                                "min_samples_leaf": [1, 2, 4],
+                            }
+                        elif best_model_name == "Random Forest Classifier":
+                            param_grid = {
+                                "n_estimators": [50, 100, 200],
+                                "max_depth": [None, 10, 20, 30],
+                                "max_features": ["sqrt", "log2"],
+                            }
+                        elif best_model_name == "SVM Classifier":
+                            param_grid = {
+                                "C": [0.1, 1, 10],
+                                "kernel": ["linear", "rbf"],
+                                "gamma": ["scale", "auto"],
+                            }
+                        elif best_model_name == "XGBoost Classifier":
+                            param_grid = {
+                                "learning_rate": [0.01, 0.1, 0.2],
+                                "n_estimators": [50, 100, 200],
+                                "max_depth": [3, 5, 7],
+                            }
+
+    # Hyperparameter grids for regression models
+                    elif target_type == "regression":
+                        if best_model_name == "Linear Regression":
+                            param_grid = {}  # Linear Regression has no hyperparameters
+                        elif best_model_name == "Ridge Regression":
+                            param_grid = {"alpha": [0.01, 0.1, 1, 10]}
+                        elif best_model_name == "Lasso Regression":
+                            param_grid = {"alpha": [0.01, 0.1, 1, 10]}
+                        elif best_model_name == "ElasticNet Regression":
+                            param_grid = {
+                                "alpha": [0.01, 0.1, 1, 10],
+                                "l1_ratio": [0.1, 0.5, 0.9],
+                            }
+                        elif best_model_name == "Decision Tree Regressor":
+                            param_grid = {
+                                "max_depth": [None, 10, 20, 30],
+                                "min_samples_split": [2, 5, 10],
+                                "min_samples_leaf": [1, 2, 4],
+                             }
+                        elif best_model_name == "Random Forest Regressor":
+                            param_grid = {
+                                "n_estimators": [50, 100, 200],
+                                "max_depth": [None, 10, 20, 30],
+                                "max_features": ["sqrt", "log2"],
+                            }
+                        elif best_model_name == "XGBoost Regressor":
+                            param_grid = {
+                                "learning_rate": [0.01, 0.1, 0.2],
+                                "n_estimators": [50, 100, 200],
+                                "max_depth": [3, 5, 7],
+                            }
+
+    # Select hyperparameter tuning method
+                    search_method = st.selectbox(
+                        "Select Hyperparameter Tuning Method:",
+                         ["Grid Search", "Random Search", "Bayesian Optimization", "Genetic Algorithms", "Hyperopt", "Optuna"],
+                    )
+
+                    if param_grid:
+                        if search_method == "Grid Search":
+                            search = GridSearchCV(
+                                best_model,
+                                param_grid,
+                                cv=5,
+                                scoring="accuracy" if target_type == "classification" else "r2",
+                            )
+                        elif search_method == "Random Search":
+                            search = RandomizedSearchCV(
+                                best_model,
+                                param_distributions=param_grid,
+                                n_iter=10,
+                                cv=5,
+                                scoring="accuracy" if target_type == "classification" else "r2",
+                            )
+                        elif search_method == "Bayesian Optimization":
+                            search = BayesSearchCV(
+                                best_model,
+                                param_grid,
+                                cv=5,
+                                scoring="accuracy" if target_type == "classification" else "r2",
+                            )
+                        elif search_method == "Genetic Algorithms":
+                            search = GeneticSelectionCV(
+                                best_model,
+                                param_grid,
+                                cv=5,
+                                scoring="accuracy" if target_type == "classification" else "r2",
+                            )
+                        elif search_method == "Hyperopt":
+                            def objective(params):
+                                best_model.set_params(**params)
+                                score = cross_val_score(best_model, X_train, y_train, cv=5, scoring="accuracy" if target_type == "classification" else "r2").mean()
+                                return {"loss": -score, "status": STATUS_OK}
+
+                            space = {
+                                "C": hp.uniform("C", 0.01, 10),
+                                "max_depth": hp.choice("max_depth", [None, 10, 20, 30]),
+                                "learning_rate": hp.uniform("learning_rate", 0.01, 0.2),
+                            }
+                            trials = Trials()
+                            best_params = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
+                            st.info(f"Best Hyperparameters (Hyperopt): {best_params}")
+                            best_model.set_params(**best_params)
+                            search = best_model
+                        elif search_method == "Optuna":
+                            def objective(trial):
+                                params = {
+                                    "C": trial.suggest_float("C", 0.01, 10),
+                                    "max_depth": trial.suggest_categorical("max_depth", [None, 10, 20, 30]),
+                                    "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2),
+                                }
+                                best_model.set_params(**params)
+                                score = cross_val_score(best_model, X_train, y_train, cv=5, scoring="accuracy" if target_type == "classification" else "r2").mean()
+                                return score
+
+                            study = optuna.create_study(direction="maximize")
+                            study.optimize(objective, n_trials=50)
+                            best_params = study.best_params
+                            st.info(f"Best Hyperparameters (Optuna): {best_params}")
+                            best_model.set_params(**best_params)
+                            search = best_model
+
+        # Fit the search object
+                        if search_method not in ["Hyperopt", "Optuna"]:
+                            search.fit(X_train, y_train)
+                            best_params = search.best_params_
+                            best_cv_score = search.best_score_
+                            cv_scores = cross_val_score(best_model, X, y, cv=5)
+
+                            st.info(f"Best Hyperparameters: {best_params}")
+                            st.info(f"Best CV Score: {best_cv_score * 100:.2f}%")
+                            st.info(f"Cross-Validation Scores: {cv_scores}")
+
+        # Save the tuned model
+                        if st.button("Save Tuned Model as Pickle"):
+                            joblib.dump(search.best_estimator_ if search_method not in ["Hyperopt", "Optuna"] else best_model, "tuned_model_TasK_1.pkl")
+                            st.success("Tuned model saved as 'tuned_model_TasK_1.pkl'")
+
+        # Check for high variance
+                        if np.var(cv_scores) > 0.05:
+                            st.warning("High variance — Model might be unstable. Consider tuning or regularization.")
+                    else:
+                        st.warning("No hyperparameters to tune for this model.")
+                else:
+                    st.warning("Train models first to enable hyperparameter tuning!")
+            except Exception as e:
+                st.warning("Please Upload a Dataset")
+
+
+
+
+elif st.session_state["page"] == "Predicting Employee Attrition":
+        st.markdown(
+    """
+    <style>
+        .eda-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap; /* Ensures it's always on one line */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+            top: -10px; /* Moves text slightly up */
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #0047AB, #007BFF); /* Ocean Blue Gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <div class='eda-title'>Predicting Employee Attrition</div>
+    """,
+    unsafe_allow_html=True
+)
+
+        st.write("Predict whether an employee will leave the company (attrition).")
+        col3,col4=st.columns(2)
+        with col3:
+            if st.button("🔙 Back", use_container_width=True):
+                navigate_to("Home")
+        with col4:
+            if st.button("🏠 Home", use_container_width=True):
+                navigate_to("Home")
+
+
+        # Load the trained models
+        decisionforemployeeattri = joblib.load(r'..\Models\decisionforemployeeattri.pkl')
+        ohe_for_emp_att = joblib.load(r'../Models/onehotencoderforemp_attri.pkl')
+        le_for_emp_att = joblib.load(r'../Models/labelforemployeeattri.pkl')
+
+        st.title("Employee Attrition Prediction")
+
+        st.header("Enter Employee Details")
+
+# User input fields
+        age = st.number_input("Age", min_value=18, max_value=65, step=1)
+        handled_MonthlyIncome = st.number_input("Monthly Income", min_value=1000, step=500)
+        JobSatisfaction = st.slider("Job Satisfaction", min_value=1, max_value=5, step=1)
+        YearsAtCompany = st.number_input("Years at Company", min_value=0, step=1)
+        overtime = st.selectbox("Overtime", ['Yes', 'No'])
+        NumCompaniesWorked = st.number_input("Number of Companies Worked", min_value=0, step=1)
+
+# Transform overtime input
+        le_ot = le_for_emp_att.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+
+# Categorical inputs
+        Department = st.selectbox("Department", ['Sales', 'HR', 'Research & Development'])
+        MaritalStatus = st.selectbox("Marital Status", ['Single', 'Married', 'Divorced'])
+
+# Convert to DataFrame
+        user_data = pd.DataFrame({'Department': [Department], 'MaritalStatus': [MaritalStatus]})
+        encoded_user_input = ohe_for_emp_att.transform(user_data)
+
+# Convert numerical inputs to NumPy array
+        num_inputs = np.array([age, handled_MonthlyIncome, JobSatisfaction, YearsAtCompany, le_ot, NumCompaniesWorked]).reshape(1, -1)
+
+# Concatenate numerical and categorical features
+        combined_input = np.concatenate([num_inputs, encoded_user_input], axis=1)
+
+# Prediction
+        if st.button("Predict Attrition"):
+            employee_attrition = decisionforemployeeattri.predict(combined_input)[0]
+            
+            prediction_text = "Likely to Leave" if employee_attrition == 'Yes' else "Likely to Stay"
+            color = "green" if employee_attrition == 'No' else "red"
+            st.markdown(f"### <span style='color:{color};'>Employee Attrition Prediction: {prediction_text}</span>", unsafe_allow_html=True)
+    
+    # Visualization
+            st.subheader("Employee Attributes")
+            st.bar_chart(pd.DataFrame({
+                "Feature": ["Age", "Monthly Income", "Job Satisfaction", "Years at Company", "Overtime", "Companies Worked"],
+                "Value": [age, handled_MonthlyIncome, JobSatisfaction, YearsAtCompany, le_ot, NumCompaniesWorked]
+            }).set_index("Feature"))
+
+
+elif st.session_state["page"] == "Predicting Job Satisfaction":
+        st.markdown(
+    """
+    <style>
+        .eda-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap; /* Ensures it's always on one line */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+            top: -10px; /* Moves text slightly up */
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #0047AB, #007BFF); /* Ocean Blue Gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <div class='eda-title'>Predicting Job Satisfaction</div>
+    """,
+    unsafe_allow_html=True
+)
+
+        st.write("Predict whether an employee will leave the company (attrition).")
+        col3,col4=st.columns(2)
+        with col3:
+            if st.button("🔙 Back", use_container_width=True):
+                navigate_to("Home")
+        with col4:
+            if st.button("🏠 Home", use_container_width=True):
+                navigate_to("Home")
+
+
+        
+
+# Load encoders and model
+        ohe_for_job_sat = joblib.load(r'..\Models\onehotforjobsat.pkl')
+        label_for_job_sat = joblib.load(r'..\Models\labelforjobsat.pkl')
+        rfc = joblib.load(r'..\Models\randomforestforjobsatisfcation.pkl')  # Assuming this is the trained model
+
+# Streamlit UI
+        st.title("Employee Attrition Prediction")
+
+# Collect numerical inputs
+        age = st.number_input("Enter Age:", min_value=18, max_value=100, step=1)
+        DistanceFromHome = st.number_input("Enter Distance from Home:", min_value=0, step=1)
+        Education = st.number_input("Enter Education Level:", min_value=1, max_value=5, step=1)
+        MonthlyIncome = st.number_input("Enter Monthly Income:", min_value=0, step=100)
+        MonthlyRate = st.number_input("Enter Monthly Rate:", min_value=0, step=100)
+        PercentSalaryHike = st.number_input("Enter Percent Salary Hike:", min_value=0, step=1)
+        RelationshipSatisfaction = st.number_input("Enter Relationship Satisfaction:", min_value=1, max_value=4, step=1)
+        PerformanceRating = st.number_input("Enter Performance Rating:", min_value=1, max_value=5, step=1)
+        WorkLifeBalance = st.number_input("Enter Work-Life Balance:", min_value=1, max_value=4, step=1)
+        YearsInCurrentRole = st.number_input("Enter Years in Current Role:", min_value=0, step=1)
+        YearsAtCompany = st.number_input("Enter Years at Company:", min_value=0, step=1)
+        YearsSinceLastPromotion = st.number_input("Enter Years Since Last Promotion:", min_value=0, step=1)
+        YearsWithCurrManager = st.number_input("Enter Years with Current Manager:", min_value=0, step=1)
+        NumCompaniesWorked = st.number_input("Enter Number of Companies Worked:", min_value=0, step=1)
+        EnvironmentSatisfaction = st.number_input("Enter Environment Satisfaction:", min_value=1, max_value=4, step=1)
+        JobInvolvement = st.number_input("Enter Job Involvement:", min_value=1, max_value=4, step=1)
+
+        overtime = st.selectbox("Enter Overtime:", ["Yes", "No"])
+        le_ot = label_for_job_sat.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+
+        attrition = st.selectbox("Enter Attrition:", ["Yes", "No"])
+        le_attrition = label_for_job_sat.transform(np.array([attrition]).reshape(1, -1)).flatten()[0]
+
+# Collect categorical inputs
+        department = st.selectbox("Enter Department:", ["Human Resources", "Research & Development", "Sales"])
+        marital_status = st.selectbox("Enter Marital Status:", ["Divorced", "Married", "Single"])
+        job_role = st.text_input("Enter Job Role:")
+        gender = st.selectbox("Enter Gender:", ["Male", "Female"])
+        business_travel = st.selectbox("Enter Business Travel:", ["Non-Travel", "Travel Frequently", "Travel Rarely"])
+        education_field = st.text_input("Enter Education Field:")
+
+# Create DataFrame for one-hot encoding
+        user_data = pd.DataFrame([{
+            'BusinessTravel': business_travel,
+            'Department': department,
+            'EducationField': education_field,
+            'Gender': gender,
+            'JobRole': job_role,
+            'MaritalStatus': marital_status
+            }])
+        
+
+        if st.button("Predict Attrition"):
+            encoded_user_input = ohe_for_job_sat.transform(user_data)
+# Convert numerical inputs to a NumPy array
+            num_inputs = np.array([
+            age, le_attrition, DistanceFromHome, Education, EnvironmentSatisfaction, JobInvolvement, 
+            MonthlyIncome, MonthlyRate, PercentSalaryHike, RelationshipSatisfaction, PerformanceRating,
+            WorkLifeBalance, YearsInCurrentRole, YearsAtCompany, YearsSinceLastPromotion,
+            YearsWithCurrManager, le_ot, NumCompaniesWorked
+            ]).reshape(1, -1)
+
+# Concatenate numerical and categorical features
+            combined_input = np.concatenate([num_inputs, encoded_user_input], axis=1)
+
+# Prediction button
+        
+            
+            prediction = rfc.predict(combined_input)
+            st.markdown(f"""
+        <div style="padding: 10px; border-radius: 5px; background-color: #f4f4f4; color: #333; font-size: 18px;">
+            <strong>Predicted Job Satisfaction Level:</strong> {prediction[0]}
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Explanation of Job Satisfaction levels
+            explanation = {
+        1: "Low Satisfaction - Employee is highly dissatisfied and may leave soon.",
+        2: "Moderate Satisfaction - Employee is somewhat dissatisfied but not actively looking to leave.",
+        3: "High Satisfaction - Employee is generally happy and engaged.",
+        4: "Very High Satisfaction - Employee is highly motivated and likely to stay long-term."
+    }
+            st.write("Explanation:", explanation.get(prediction[0], "Unknown Satisfaction Level"))
