@@ -502,7 +502,7 @@ if st.session_state["page"] == "Home":
 
 
     # st.image(r'https://th.bing.com/th/id/OIP.XYqwtumU1KttgweY4tInCQHaEf?w=1000&h=607&rs=1&pid=ImgDetMain')
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3 , col4 = st.columns(4)
     image_size = 150
 
     # col5,col6,col7=st.columns(3)
@@ -516,12 +516,11 @@ if st.session_state["page"] == "Home":
 
         
 
-        st.image(
-            r"https://cdn-icons-png.flaticon.com/512/7012/7012934.png",
-            use_container_width=True,
-        )
-        if st.button("Instructions", use_container_width=True):
-            navigate_to("Instructions")
+       
+
+        
+
+      
 
         
         
@@ -542,28 +541,8 @@ if st.session_state["page"] == "Home":
         if st.button("Model Selection", use_container_width=True):
             navigate_to("Model Selection")
 
-
-        st.image(
-            r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
-            use_container_width=True,
-        )
-        if st.button("Predicting Job Satisfaction", use_container_width=True):
-            navigate_to("Predicting Job Satisfaction")
-
-
-        
-
-
-
-        
-
-        
-
-        
-        
        
 
-       
 
     with col3:
         st.image(
@@ -572,6 +551,19 @@ if st.session_state["page"] == "Home":
         )
         if st.button("Predicting Employee Attrition", use_container_width=True):
             navigate_to("Predicting Employee Attrition")
+        
+
+    with col4:
+        
+        st.image(
+            r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
+            use_container_width=True,
+        )
+        if st.button("Predicting Job Satisfaction", use_container_width=True):
+            navigate_to("Predicting Job Satisfaction")
+        
+
+        
       
 
        
@@ -1886,7 +1878,11 @@ elif st.session_state["page"] == "Predicting Employee Attrition":
     unsafe_allow_html=True
 )
 
-        st.write("Predict whether an employee will leave the company (attrition).")
+        st.markdown(
+    "<h4 style='text-align: center;'>Predict whether an employee will leave the company (attrition).</h4>",
+    unsafe_allow_html=True
+)
+
         col3,col4=st.columns(2)
         with col3:
             if st.button("🔙 Back", use_container_width=True):
@@ -1901,26 +1897,40 @@ elif st.session_state["page"] == "Predicting Employee Attrition":
         ohe_for_emp_att = joblib.load(r'../Models/onehotencoderforemp_attri.pkl')
         le_for_emp_att = joblib.load(r'../Models/labelforemployeeattri.pkl')
 
-        st.title("Employee Attrition Prediction")
+        
 
         st.header("Enter Employee Details")
 
 # User input fields
-        age = st.number_input("Age", min_value=18, max_value=65, step=1)
-        handled_MonthlyIncome = st.number_input("Monthly Income", min_value=1000, step=500)
-        JobSatisfaction = st.slider("Job Satisfaction", min_value=1, max_value=5, step=1)
-        YearsAtCompany = st.number_input("Years at Company", min_value=0, step=1)
-        overtime = st.selectbox("Overtime", ['Yes', 'No'])
-        NumCompaniesWorked = st.number_input("Number of Companies Worked", min_value=0, step=1)
+        # First row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            age = st.number_input("Age", min_value=18, max_value=65, step=1)
+        with col2:
+            handled_MonthlyIncome = st.number_input("Monthly Income", min_value=1000, step=500)
+        with col3:
+                JobSatisfaction = st.slider("Job Satisfaction", min_value=1, max_value=5, step=1)
 
-# Transform overtime input
-        le_ot = le_for_emp_att.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+# Second row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            YearsAtCompany = st.number_input("Years at Company", min_value=0, step=1)
+        with col2:
+            overtime = st.selectbox("Overtime", ['Yes', 'No'])
+            
+        with col3:
+            NumCompaniesWorked = st.number_input("Number of Companies Worked", min_value=0, step=1)
 
-# Categorical inputs
-        Department = st.selectbox("Department", ['Sales', 'HR', 'Research & Development'])
-        MaritalStatus = st.selectbox("Marital Status", ['Single', 'Married', 'Divorced'])
+# Third row (Categorical)
+        col1, col2 = st.columns(2)
+        with col1:
+            Department = st.selectbox("Department", ['Sales', 'HR', 'Research & Development'])
+        with col2:
+            MaritalStatus = st.selectbox("Marital Status", ['Single', 'Married', 'Divorced'])
+
 
 # Convert to DataFrame
+        le_ot = le_for_emp_att.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]  
         user_data = pd.DataFrame({'Department': [Department], 'MaritalStatus': [MaritalStatus]})
         encoded_user_input = ohe_for_emp_att.transform(user_data)
 
@@ -1971,7 +1981,11 @@ elif st.session_state["page"] == "Predicting Job Satisfaction":
     unsafe_allow_html=True
 )
 
-        st.write("Predict whether an employee will leave the company (attrition).")
+        st.markdown(
+    "<h4 style='text-align: center;'>Predict the job satisfaction level of an employee.</h4>",
+    unsafe_allow_html=True
+)
+
         col3,col4=st.columns(2)
         with col3:
             if st.button("🔙 Back", use_container_width=True):
@@ -1980,7 +1994,7 @@ elif st.session_state["page"] == "Predicting Job Satisfaction":
             if st.button("🏠 Home", use_container_width=True):
                 navigate_to("Home")
 
-
+        st.header("Enter Employee Details")
         
 
 # Load encoders and model
@@ -1989,39 +2003,105 @@ elif st.session_state["page"] == "Predicting Job Satisfaction":
         rfc = joblib.load(r'..\Models\randomforestforjobsatisfcation.pkl')  # Assuming this is the trained model
 
 # Streamlit UI
-        st.title("Employee Attrition Prediction")
+        
 
 # Collect numerical inputs
-        age = st.number_input("Enter Age:", min_value=18, max_value=100, step=1)
-        DistanceFromHome = st.number_input("Enter Distance from Home:", min_value=0, step=1)
-        Education = st.number_input("Enter Education Level:", min_value=1, max_value=5, step=1)
-        MonthlyIncome = st.number_input("Enter Monthly Income:", min_value=0, step=100)
-        MonthlyRate = st.number_input("Enter Monthly Rate:", min_value=0, step=100)
-        PercentSalaryHike = st.number_input("Enter Percent Salary Hike:", min_value=0, step=1)
-        RelationshipSatisfaction = st.number_input("Enter Relationship Satisfaction:", min_value=1, max_value=4, step=1)
-        PerformanceRating = st.number_input("Enter Performance Rating:", min_value=1, max_value=5, step=1)
-        WorkLifeBalance = st.number_input("Enter Work-Life Balance:", min_value=1, max_value=4, step=1)
-        YearsInCurrentRole = st.number_input("Enter Years in Current Role:", min_value=0, step=1)
-        YearsAtCompany = st.number_input("Enter Years at Company:", min_value=0, step=1)
-        YearsSinceLastPromotion = st.number_input("Enter Years Since Last Promotion:", min_value=0, step=1)
-        YearsWithCurrManager = st.number_input("Enter Years with Current Manager:", min_value=0, step=1)
-        NumCompaniesWorked = st.number_input("Enter Number of Companies Worked:", min_value=0, step=1)
-        EnvironmentSatisfaction = st.number_input("Enter Environment Satisfaction:", min_value=1, max_value=4, step=1)
-        JobInvolvement = st.number_input("Enter Job Involvement:", min_value=1, max_value=4, step=1)
+        # First row
+        col1, col2, col3 , col4= st.columns(4)
+        with col1:
+            age = st.number_input("Enter Age:", min_value=18, max_value=100, step=1)
+        with col2:
+            DistanceFromHome = st.number_input("Enter Distance from Home:", min_value=0, step=1)
+        with col3:
+            Education = st.number_input("Enter Education Level:", min_value=1, max_value=5, step=1)
+        with col4:
+             business_travel = st.selectbox("Enter Business Travel:", ["Non-Travel", "Travel_Frequently", "Travel_Rarely"])
 
-        overtime = st.selectbox("Enter Overtime:", ["Yes", "No"])
-        le_ot = label_for_job_sat.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+# Second row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            MonthlyIncome = st.number_input("Enter Monthly Income:", min_value=0, step=100)
+        with col2:
+            MonthlyRate = st.number_input("Enter Monthly Rate:", min_value=0, step=100)
+        with col3:
+            PercentSalaryHike = st.number_input("Enter Percent Salary Hike:", min_value=0, step=1)
 
-        attrition = st.selectbox("Enter Attrition:", ["Yes", "No"])
-        le_attrition = label_for_job_sat.transform(np.array([attrition]).reshape(1, -1)).flatten()[0]
+# Third row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            RelationshipSatisfaction = st.number_input("Enter Relationship Satisfaction:", min_value=1, max_value=4, step=1)
+        with col2:
+            PerformanceRating = st.number_input("Enter Performance Rating:", min_value=1, max_value=5, step=1)
+        with col3:
+            WorkLifeBalance = st.number_input("Enter Work-Life Balance:", min_value=1, max_value=4, step=1)
 
-# Collect categorical inputs
-        department = st.selectbox("Enter Department:", ["Human Resources", "Research & Development", "Sales"])
-        marital_status = st.selectbox("Enter Marital Status:", ["Divorced", "Married", "Single"])
-        job_role = st.text_input("Enter Job Role:")
-        gender = st.selectbox("Enter Gender:", ["Male", "Female"])
-        business_travel = st.selectbox("Enter Business Travel:", ["Non-Travel", "Travel Frequently", "Travel Rarely"])
-        education_field = st.text_input("Enter Education Field:")
+# Fourth row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            YearsInCurrentRole = st.number_input("Enter Years in Current Role:", min_value=0, step=1)
+        with col2:
+            YearsAtCompany = st.number_input("Enter Years at Company:", min_value=0, step=1)
+        with col3:
+            YearsSinceLastPromotion = st.number_input("Enter Years Since Last Promotion:", min_value=0, step=1)
+
+# Fifth row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            YearsWithCurrManager = st.number_input("Enter Years with Current Manager:", min_value=0, step=1)
+        with col2:
+            NumCompaniesWorked = st.number_input("Enter Number of Companies Worked:", min_value=0, step=1)
+        with col3:
+            EnvironmentSatisfaction = st.number_input("Enter Environment Satisfaction:", min_value=1, max_value=4, step=1)
+
+# Sixth row
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            JobInvolvement = st.number_input("Enter Job Involvement:", min_value=1, max_value=4, step=1)
+        with col2:
+            overtime = st.selectbox("Enter Overtime:", ["Yes", "No"])
+            le_ot = label_for_job_sat.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+        with col3:
+            attrition = st.selectbox("Enter Attrition:", ["Yes", "No"])
+            le_attrition = label_for_job_sat.transform(np.array([attrition]).reshape(1, -1)).flatten()[0]
+
+# Seventh row (Categorical inputs)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            department = st.selectbox("Enter Department:", ["Human Resources", "Research & Development", "Sales"])
+        with col2:
+            marital_status = st.selectbox("Enter Marital Status:", ["Divorced", "Married", "Single"])
+        with col3:
+            job_role = st.selectbox(
+    "Select Job Role:", 
+    [
+        "Healthcare Representative", 
+        "Human Resources", 
+        "Laboratory Technician", 
+        "Manager", 
+        "Manufacturing Director", 
+        "Research Director", 
+        "Research Scientist", 
+        "Sales Executive", 
+        "Sales Representative"
+    ]
+)
+
+            
+
+
+# Eighth row
+        col1, col2 = st.columns(2)
+        with col1:
+            gender = st.selectbox("Enter Gender:", ["Male", "Female"])
+        with col2:
+            
+            education_field = st.selectbox(
+    "Select education_field:", 
+    ["Human Resources", "Life Sciences", "Marketing", "Medical", "Other", "Technical Degree"]
+)
+        
+            
+
 
 # Create DataFrame for one-hot encoding
         user_data = pd.DataFrame([{
