@@ -515,6 +515,14 @@ if st.session_state["page"] == "Home":
                 navigate_to("EDA")
 
         
+        st.image(
+            r"https://www.creativefabrica.com/wp-content/uploads/2019/01/Rating-icon-by-back1design1-1.png",
+            use_container_width=True,
+        )
+        if st.button("Performance Rating", use_container_width=True):
+            navigate_to("Performance Rating")
+
+        
 
        
 
@@ -1955,6 +1963,147 @@ elif st.session_state["page"] == "Predicting Employee Attrition":
                 "Value": [age, handled_MonthlyIncome, JobSatisfaction, YearsAtCompany, le_ot, NumCompaniesWorked]
             }).set_index("Feature"))
 
+if st.session_state.get("page") == "Performance Rating":
+        
+        st.markdown(
+        """
+        <style>
+            .eda-title {
+                text-align: center;
+                font-size: 36px;
+                font-weight: bold;
+                text-transform: uppercase;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                position: relative;
+                top: -10px;
+                letter-spacing: 1px;
+                background: linear-gradient(to right, #0047AB, #007BFF);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        </style>
+        <div class='eda-title'>Performance Rating</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+        st.write("Fill in the details to predict the employee's performance rating:")
+
+    
+
+        col3, col4 = st.columns(2)
+        with col3:
+            if st.button("🔙 Back", use_container_width=True):
+                st.session_state["page"] = "Home"
+        with col4:
+            if st.button("🏠 Home", use_container_width=True):
+                st.session_state["page"] = "Home"
+
+        ohe_for_job_sat = joblib.load(r'..\Models\onehotforjobsat.pkl')
+        label_for_job_sat = joblib.load(r'..\Models\labelforjobsat.pkl')
+        logistic_model = joblib.load(r'..\Models\logistic_for_performance_rating.pkl')
+
+# Page title
+
+        
+    # ---------- Input Form ----------
+        with st.form("perf_form"):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                Age = st.number_input("Age", min_value=18, max_value=60, step=1)
+                DistanceFromHome = st.number_input("Distance from Home", step=1)
+                Education = st.selectbox("Education Level", [1, 2, 3, 4, 5])
+                EnvironmentSatisfaction = st.slider("Environment Satisfaction", 1, 4)
+                JobInvolvement = st.slider("Job Involvement", 1, 4)
+                MonthlyIncome = st.number_input("Monthly Income", step=100)
+                MonthlyRate = st.number_input("Monthly Rate", step=100)
+
+            with col2:
+                PercentSalaryHike = st.slider("Percent Salary Hike", 0, 100)
+                RelationshipSatisfaction = st.slider("Relationship Satisfaction", 1, 4)
+                WorkLifeBalance = st.slider("Work-Life Balance", 1, 4)
+                YearsInCurrentRole = st.number_input("Years in Current Role", step=1)
+                OverTime = st.selectbox("OverTime", ["Yes", "No"])
+                
+            
+            # Categorical inputs
+                BusinessTravel = st.selectbox("Business Travel", ["Non-Travel", "Travel Frequently", "Travel Rarely"])
+                Department = st.selectbox("Department", ["Sales", "Research & Development", "Human Resources"])
+                EducationField = st.selectbox("Education Field", ["Life Sciences", "Medical", "Marketing", "Technical Degree", "Human Resources", "Other"])
+                Gender = st.selectbox("Gender", ["Male", "Female"])
+                JobRole = st.selectbox("Job Role", ["Sales Executive", "Research Scientist", "Laboratory Technician", "Manufacturing Director", 
+                                                "Healthcare Representative", "Manager", "Sales Representative", 
+                                                "Research Director", "Human Resources"])
+                MaritalStatus = st.selectbox("Marital Status", ["Single", "Married", "Divorced"])
+
+            submitted = st.form_submit_button("Predict")
+
+        if submitted:
+        # Numerical inputs
+            numerical_inputs = [
+                Age,
+                DistanceFromHome,
+                Education,
+                EnvironmentSatisfaction,
+                JobInvolvement,
+                MonthlyIncome,
+                MonthlyRate,
+                PercentSalaryHike,
+                RelationshipSatisfaction,
+                WorkLifeBalance,
+                YearsInCurrentRole,
+                label_for_job_sat.transform([[OverTime]])[0],
+                
+            ]
+
+        # Categorical inputs
+            cat_input = pd.DataFrame([{
+            "BusinessTravel": BusinessTravel,
+            "Department": Department,
+            "EducationField": EducationField,
+            "Gender": Gender,
+            "JobRole": JobRole,
+            "MaritalStatus": MaritalStatus
+            }])
+
+            cat_encoded = ohe_for_job_sat.transform(cat_input)
+
+        # Final input
+            final_input = np.concatenate([np.array(numerical_inputs).reshape(1, -1), cat_encoded], axis=1)
+
+            prediction = logistic_model.predict(final_input)[0]
+
+# Map prediction to label
+            rating_label = {
+    3: "Excellent (Exceeds Expectations)",
+    4: "Outstanding (Top Performer)"
+    }.get(prediction, "Unknown")
+
+# Set background gradient by rating
+            bg_gradient = "linear-gradient(to right, #3A7BD5, #00d2ff);" if prediction == 3 else "linear-gradient(to right, #8E2DE2, #4A00E0);"
+
+# Styled block with CSS
+            st.markdown(f"""
+    <div style="
+        padding: 1.5rem;
+        border-radius: 15px;
+        background: {bg_gradient};
+        color: white;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        margin-top: 20px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    ">
+         Predicted Performance Rating: {prediction} - {rating_label}
+    </div>
+""", unsafe_allow_html=True)
+
+
+        
 
 elif st.session_state["page"] == "Predicting Job Satisfaction":
         st.markdown(
