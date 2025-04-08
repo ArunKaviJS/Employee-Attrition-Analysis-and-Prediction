@@ -514,13 +514,16 @@ if st.session_state["page"] == "Home":
         if st.button("Exploratory Data Analyse"):
                 navigate_to("EDA")
 
-        
         st.image(
-            r"https://www.creativefabrica.com/wp-content/uploads/2019/01/Rating-icon-by-back1design1-1.png",
+            r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
             use_container_width=True,
         )
-        if st.button("Performance Rating", use_container_width=True):
-            navigate_to("Performance Rating")
+        if st.button("Predicting Job Satisfaction", use_container_width=True):
+            navigate_to("Predicting Job Satisfaction")
+        
+
+        
+        
 
         
 
@@ -549,6 +552,15 @@ if st.session_state["page"] == "Home":
         if st.button("Model Selection", use_container_width=True):
             navigate_to("Model Selection")
 
+        
+
+        # st.image(
+        #     r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
+        #     use_container_width=True,
+        # )
+        # if st.button("Danger Satisfaction", use_container_width=True):
+        #     navigate_to("Danger Satisfaction")
+
        
 
 
@@ -562,14 +574,14 @@ if st.session_state["page"] == "Home":
         
 
     with col4:
-        
         st.image(
-            r"https://cdn-icons-png.flaticon.com/512/10165/10165599.png",
+            r"https://th.bing.com/th/id/OIP.F_v2ZXGhy9OlR_QbYA-NXgHaHa?pid=ImgDet&w=170.41420118343197&h=180&c=7&dpr=1.3",
             use_container_width=True,
         )
-        if st.button("Predicting Job Satisfaction", use_container_width=True):
-            navigate_to("Predicting Job Satisfaction")
+        if st.button("Performance Rating", use_container_width=True):
+            navigate_to("Performance Rating")
         
+      
 
         
       
@@ -1963,7 +1975,7 @@ elif st.session_state["page"] == "Predicting Employee Attrition":
                 "Value": [age, handled_MonthlyIncome, JobSatisfaction, YearsAtCompany, le_ot, NumCompaniesWorked]
             }).set_index("Feature"))
 
-if st.session_state.get("page") == "Performance Rating":
+elif st.session_state.get("page") == "Performance Rating":
         
         st.markdown(
         """
@@ -2030,7 +2042,7 @@ if st.session_state.get("page") == "Performance Rating":
                 
             
             # Categorical inputs
-                BusinessTravel = st.selectbox("Business Travel", ["Non-Travel", "Travel Frequently", "Travel Rarely"])
+                BusinessTravel = st.selectbox("Business Travel", ["Non-Travel", "Travel_Frequently", "Travel_Rarely"])
                 Department = st.selectbox("Department", ["Sales", "Research & Development", "Human Resources"])
                 EducationField = st.selectbox("Education Field", ["Life Sciences", "Medical", "Marketing", "Technical Degree", "Human Resources", "Other"])
                 Gender = st.selectbox("Gender", ["Male", "Female"])
@@ -2105,192 +2117,273 @@ if st.session_state.get("page") == "Performance Rating":
 
         
 
-elif st.session_state["page"] == "Predicting Job Satisfaction":
-        st.markdown(
-    """
-    <style>
-        .eda-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: bold;
-            text-transform: uppercase;
-            white-space: nowrap; /* Ensures it's always on one line */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            position: relative;
-            top: -10px; /* Moves text slightly up */
-            letter-spacing: 1px;
-            background: linear-gradient(to right, #0047AB, #007BFF); /* Ocean Blue Gradient */
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
-    <div class='eda-title'>Predicting Job Satisfaction</div>
-    """,
-    unsafe_allow_html=True
-)
+# elif st.session_state["page"] == "Predicting Job Satisfaction":
+#         st.markdown(
+#     """
+#     <style>
+#         .eda-title {
+#             text-align: center;
+#             font-size: 36px;
+#             font-weight: bold;
+#             text-transform: uppercase;
+#             white-space: nowrap; /* Ensures it's always on one line */
+#             overflow: hidden;
+#             text-overflow: ellipsis;
+#             position: relative;
+#             top: -10px; /* Moves text slightly up */
+#             letter-spacing: 1px;
+#             background: linear-gradient(to right, #0047AB, #007BFF); /* Ocean Blue Gradient */
+#             -webkit-background-clip: text;
+#             -webkit-text-fill-color: transparent;
+#         }
+#     </style>
+#     <div class='eda-title'>Predicting Job Satisfaction</div>
+#     """,
+#     unsafe_allow_html=True
+# )
 
-        st.markdown(
-    "<h4 style='text-align: center;'>Predict the job satisfaction level of an employee.</h4>",
-    unsafe_allow_html=True
-)
+#         st.markdown(
+#     "<h4 style='text-align: center;'>Predict the job satisfaction level of an employee.</h4>",
+#     unsafe_allow_html=True
+# )
 
-        col3,col4=st.columns(2)
-        with col3:
-            if st.button("🔙 Back", use_container_width=True):
-                navigate_to("Home")
-        with col4:
-            if st.button("🏠 Home", use_container_width=True):
-                navigate_to("Home")
+#         col3,col4=st.columns(2)
+#         with col3:
+#             if st.button("🔙 Back", use_container_width=True):
+#                 navigate_to("Home")
+#         with col4:
+#             if st.button("🏠 Home", use_container_width=True):
+#                 navigate_to("Home")
 
-        st.header("Enter Employee Details")
+#         st.header("Enter Employee Details")
         
 
-# Load encoders and model
-        ohe_for_job_sat = joblib.load(r'..\Models\onehotforjobsat.pkl')
-        label_for_job_sat = joblib.load(r'..\Models\labelforjobsat.pkl')
-        rfc = joblib.load(r'..\Models\randomforestforjobsatisfcation.pkl')  # Assuming this is the trained model
+# # Load encoders and model
+#         ohe_for_job_sat = joblib.load(r'..\Models\onehotforjobsat.pkl')
+#         label_for_job_sat = joblib.load(r'..\Models\labelforjobsat.pkl')
+#         rfc = joblib.load(r'..\Models\randomforestforjobsatisfcation.pkl')  # Assuming this is the trained model
 
-# Streamlit UI
+# # Streamlit UI
         
 
-# Collect numerical inputs
-        # First row
-        col1, col2, col3 , col4= st.columns(4)
-        with col1:
-            age = st.number_input("Enter Age:", min_value=18, max_value=100, step=1)
-        with col2:
-            DistanceFromHome = st.number_input("Enter Distance from Home:", min_value=0, step=1)
-        with col3:
-            Education = st.number_input("Enter Education Level:", min_value=1, max_value=5, step=1)
-        with col4:
-             business_travel = st.selectbox("Enter Business Travel:", ["Non-Travel", "Travel_Frequently", "Travel_Rarely"])
+# # Collect numerical inputs
+#         # First row
+#         col1, col2, col3 , col4= st.columns(4)
+#         with col1:
+#             age = st.number_input("Enter Age:", min_value=18, max_value=100, step=1)
+#         with col2:
+#             DistanceFromHome = st.number_input("Enter Distance from Home:", min_value=0, step=1)
+#         with col3:
+#             Education = st.number_input("Enter Education Level:", min_value=1, max_value=5, step=1)
+#         with col4:
+#              business_travel = st.selectbox("Enter Business Travel:", ["Non-Travel", "Travel_Frequently", "Travel_Rarely"])
 
-# Second row
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            MonthlyIncome = st.number_input("Enter Monthly Income:", min_value=0, step=100)
-        with col2:
-            MonthlyRate = st.number_input("Enter Monthly Rate:", min_value=0, step=100)
-        with col3:
-            PercentSalaryHike = st.number_input("Enter Percent Salary Hike:", min_value=0, step=1)
+# # Second row
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             MonthlyIncome = st.number_input("Enter Monthly Income:", min_value=0, step=100)
+#         with col2:
+#             MonthlyRate = st.number_input("Enter Monthly Rate:", min_value=0, step=100)
+#         with col3:
+#             PercentSalaryHike = st.number_input("Enter Percent Salary Hike:", min_value=0, step=1)
 
-# Third row
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            RelationshipSatisfaction = st.number_input("Enter Relationship Satisfaction:", min_value=1, max_value=4, step=1)
-        with col2:
-            PerformanceRating = st.number_input("Enter Performance Rating:", min_value=1, max_value=5, step=1)
-        with col3:
-            WorkLifeBalance = st.number_input("Enter Work-Life Balance:", min_value=1, max_value=4, step=1)
+# # Third row
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             RelationshipSatisfaction = st.number_input("Enter Relationship Satisfaction:", min_value=1, max_value=4, step=1)
+#         with col2:
+#             PerformanceRating = st.number_input("Enter Performance Rating:", min_value=1, max_value=5, step=1)
+#         with col3:
+#             WorkLifeBalance = st.number_input("Enter Work-Life Balance:", min_value=1, max_value=4, step=1)
 
-# Fourth row
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            YearsInCurrentRole = st.number_input("Enter Years in Current Role:", min_value=0, step=1)
-        with col2:
-            YearsAtCompany = st.number_input("Enter Years at Company:", min_value=0, step=1)
-        with col3:
-            YearsSinceLastPromotion = st.number_input("Enter Years Since Last Promotion:", min_value=0, step=1)
+# # Fourth row
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             YearsInCurrentRole = st.number_input("Enter Years in Current Role:", min_value=0, step=1)
+#         with col2:
+#             YearsAtCompany = st.number_input("Enter Years at Company:", min_value=0, step=1)
+#         with col3:
+#             YearsSinceLastPromotion = st.number_input("Enter Years Since Last Promotion:", min_value=0, step=1)
 
-# Fifth row
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            YearsWithCurrManager = st.number_input("Enter Years with Current Manager:", min_value=0, step=1)
-        with col2:
-            NumCompaniesWorked = st.number_input("Enter Number of Companies Worked:", min_value=0, step=1)
-        with col3:
-            EnvironmentSatisfaction = st.number_input("Enter Environment Satisfaction:", min_value=1, max_value=4, step=1)
+# # Fifth row
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             YearsWithCurrManager = st.number_input("Enter Years with Current Manager:", min_value=0, step=1)
+#         with col2:
+#             NumCompaniesWorked = st.number_input("Enter Number of Companies Worked:", min_value=0, step=1)
+#         with col3:
+#             EnvironmentSatisfaction = st.number_input("Enter Environment Satisfaction:", min_value=1, max_value=4, step=1)
 
-# Sixth row
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            JobInvolvement = st.number_input("Enter Job Involvement:", min_value=1, max_value=4, step=1)
-        with col2:
-            overtime = st.selectbox("Enter Overtime:", ["Yes", "No"])
-            le_ot = label_for_job_sat.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
-        with col3:
-            attrition = st.selectbox("Enter Attrition:", ["Yes", "No"])
-            le_attrition = label_for_job_sat.transform(np.array([attrition]).reshape(1, -1)).flatten()[0]
+# # Sixth row
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             JobInvolvement = st.number_input("Enter Job Involvement:", min_value=1, max_value=4, step=1)
+#         with col2:
+#             overtime = st.selectbox("Enter Overtime:", ["Yes", "No"])
+#             le_ot = label_for_job_sat.transform(np.array([overtime]).reshape(1, -1)).flatten()[0]
+#         with col3:
+#             attrition = st.selectbox("Enter Attrition:", ["Yes", "No"])
+#             le_attrition = label_for_job_sat.transform(np.array([attrition]).reshape(1, -1)).flatten()[0]
 
-# Seventh row (Categorical inputs)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            department = st.selectbox("Enter Department:", ["Human Resources", "Research & Development", "Sales"])
-        with col2:
-            marital_status = st.selectbox("Enter Marital Status:", ["Divorced", "Married", "Single"])
-        with col3:
-            job_role = st.selectbox(
-    "Select Job Role:", 
-    [
-        "Healthcare Representative", 
-        "Human Resources", 
-        "Laboratory Technician", 
-        "Manager", 
-        "Manufacturing Director", 
-        "Research Director", 
-        "Research Scientist", 
-        "Sales Executive", 
-        "Sales Representative"
-    ]
-)
+# # Seventh row (Categorical inputs)
+#         col1, col2, col3 = st.columns(3)
+#         with col1:
+#             department = st.selectbox("Enter Department:", ["Human Resources", "Research & Development", "Sales"])
+#         with col2:
+#             marital_status = st.selectbox("Enter Marital Status:", ["Divorced", "Married", "Single"])
+#         with col3:
+#             job_role = st.selectbox(
+#     "Select Job Role:", 
+#     [
+#         "Healthcare Representative", 
+#         "Human Resources", 
+#         "Laboratory Technician", 
+#         "Manager", 
+#         "Manufacturing Director", 
+#         "Research Director", 
+#         "Research Scientist", 
+#         "Sales Executive", 
+#         "Sales Representative"
+#     ]
+# )
 
             
 
 
-# Eighth row
-        col1, col2 = st.columns(2)
-        with col1:
-            gender = st.selectbox("Enter Gender:", ["Male", "Female"])
-        with col2:
+# # Eighth row
+#         col1, col2 = st.columns(2)
+#         with col1:
+#             gender = st.selectbox("Enter Gender:", ["Male", "Female"])
+#         with col2:
             
-            education_field = st.selectbox(
-    "Select education_field:", 
-    ["Human Resources", "Life Sciences", "Marketing", "Medical", "Other", "Technical Degree"]
-)
+#             education_field = st.selectbox(
+#     "Select education_field:", 
+#     ["Human Resources", "Life Sciences", "Marketing", "Medical", "Other", "Technical Degree"]
+# )
         
             
 
 
-# Create DataFrame for one-hot encoding
-        user_data = pd.DataFrame([{
-            'BusinessTravel': business_travel,
-            'Department': department,
-            'EducationField': education_field,
-            'Gender': gender,
-            'JobRole': job_role,
-            'MaritalStatus': marital_status
-            }])
+# # Create DataFrame for one-hot encoding
+#         user_data = pd.DataFrame([{
+#             'BusinessTravel': business_travel,
+#             'Department': department,
+#             'EducationField': education_field,
+#             'Gender': gender,
+#             'JobRole': job_role,
+#             'MaritalStatus': marital_status
+#             }])
         
 
-        if st.button("Predict Attrition"):
-            encoded_user_input = ohe_for_job_sat.transform(user_data)
-# Convert numerical inputs to a NumPy array
-            num_inputs = np.array([
-            age, le_attrition, DistanceFromHome, Education, EnvironmentSatisfaction, JobInvolvement, 
-            MonthlyIncome, MonthlyRate, PercentSalaryHike, RelationshipSatisfaction, PerformanceRating,
-            WorkLifeBalance, YearsInCurrentRole, YearsAtCompany, YearsSinceLastPromotion,
-            YearsWithCurrManager, le_ot, NumCompaniesWorked
-            ]).reshape(1, -1)
+#         if st.button("Predict Attrition"):
+#             encoded_user_input = ohe_for_job_sat.transform(user_data)
+# # Convert numerical inputs to a NumPy array
+#             num_inputs = np.array([
+#             age, le_attrition, DistanceFromHome, Education, EnvironmentSatisfaction, JobInvolvement, 
+#             MonthlyIncome, MonthlyRate, PercentSalaryHike, RelationshipSatisfaction, PerformanceRating,
+#             WorkLifeBalance, YearsInCurrentRole, YearsAtCompany, YearsSinceLastPromotion,
+#             YearsWithCurrManager, le_ot, NumCompaniesWorked
+#             ]).reshape(1, -1)
 
-# Concatenate numerical and categorical features
-            combined_input = np.concatenate([num_inputs, encoded_user_input], axis=1)
+# # Concatenate numerical and categorical features
+#             combined_input = np.concatenate([num_inputs, encoded_user_input], axis=1)
 
-# Prediction button
+# # Prediction button
         
             
-            prediction = rfc.predict(combined_input)
-            st.markdown(f"""
-        <div style="padding: 10px; border-radius: 5px; background-color: #f4f4f4; color: #333; font-size: 18px;">
-            <strong>Predicted Job Satisfaction Level:</strong> {prediction[0]}
-        </div>
-    """, unsafe_allow_html=True)
+#             prediction = rfc.predict(combined_input)
+#             st.markdown(f"""
+#         <div style="padding: 10px; border-radius: 5px; background-color: #f4f4f4; color: #333; font-size: 18px;">
+#             <strong>Predicted Job Satisfaction Level:</strong> {prediction[0]}
+#         </div>
+#     """, unsafe_allow_html=True)
     
-    # Explanation of Job Satisfaction levels
-            explanation = {
-        1: "Low Satisfaction - Employee is highly dissatisfied and may leave soon.",
-        2: "Moderate Satisfaction - Employee is somewhat dissatisfied but not actively looking to leave.",
-        3: "High Satisfaction - Employee is generally happy and engaged.",
-        4: "Very High Satisfaction - Employee is highly motivated and likely to stay long-term."
-    }
-            st.write("Explanation:", explanation.get(prediction[0], "Unknown Satisfaction Level"))
+#     # Explanation of Job Satisfaction levels
+#             explanation = {
+#         1: "Low Satisfaction - Employee is highly dissatisfied and may leave soon.",
+#         2: "Moderate Satisfaction - Employee is somewhat dissatisfied but not actively looking to leave.",
+#         3: "High Satisfaction - Employee is generally happy and engaged.",
+#         4: "Very High Satisfaction - Employee is highly motivated and likely to stay long-term."
+#     }
+#             st.write("Explanation:", explanation.get(prediction[0], "Unknown Satisfaction Level"))
+
+
+
+
+# elif st.session_state.get("page") == "Danger Satisfaction":
+        
+#         st.markdown(
+#         """
+#         <style>
+#             .eda-title {
+#                 text-align: center;
+#                 font-size: 36px;
+#                 font-weight: bold;
+#                 text-transform: uppercase;
+#                 white-space: nowrap;
+#                 overflow: hidden;
+#                 text-overflow: ellipsis;
+#                 position: relative;
+#                 top: -10px;
+#                 letter-spacing: 1px;
+#                 background: linear-gradient(to right, #0047AB, #007BFF);
+#                 -webkit-background-clip: text;
+#                 -webkit-text-fill-color: transparent;
+#             }
+#         </style>
+#         <div class='eda-title'>Performance Rating</div>
+#         """,
+#         unsafe_allow_html=True
+#     )
+
+#         st.write("Fill in the details to predict the employee's performance rating:")
+
+    
+
+#         col3, col4 = st.columns(2)
+#         with col3:
+#             if st.button("🔙 Back", use_container_width=True):
+#                 st.session_state["page"] = "Home"
+#         with col4:
+#             if st.button("🏠 Home", use_container_width=True):
+#                 st.session_state["page"] = "Home"
+
+
+#         # Load model and encoders
+#         model = joblib.load(r"..\Models\decisionforemployeeattri.pkl")  # Replace with actual path
+#         ohe = joblib.load(r"..\Models\onehotencoderforemp_attri.pkl")  # One-hot encoder if used
+#         le = joblib.load(r"..\Models\labelforemployeeattri.pkl")  # Label encoder if used
+
+# # Load your dataset (excluding the target 'Attrition' if you're predicting on the same data)
+#         data = pd.read_csv(r"..\Data\Employee-Attrition - Employee-Attrition (1).csv")  # Original data
+        
+#         target=pd.read_csv(r'..\Data\Preprocessed_data.csv')
+#         del target['Unnamed: 0']
+
+# # Preprocess: (Apply same transformation as in training)
+#         selected_columns = [
+#     'Age', 'handled_MonthlyIncome', 'JobSatisfaction',
+#     'YearsAtCompany', 'OverTime', 'NumCompaniesWorked',
+#     'Department_Human Resources', 'Department_Research & Development',
+#     'Department_Sales', 'MaritalStatus_Divorced',
+#     'MaritalStatus_Married', 'MaritalStatus_Single'
+# ]
+
+# # Encode 'OverTime' using label encoder
+#         if 'OverTime' in data.columns:
+#             data['OverTime'] = le.transform(target['OverTime'])
+
+# # One-hot encoding already applied during data preparation. We assume the dataset has all required columns.
+#         input_data = data[selected_columns].copy()
+
+# # Predict attrition probabilities
+#         probs = model.predict_proba(input_data)[:, 1]
+#         data['Attrition_Prob'] = probs
+
+# # Sort and show top N at-risk employees
+#         top_n = st.slider("Select number of at-risk employees to display:", min_value=5, max_value=50, value=10)
+#         top_risks = data.sort_values(by="Attrition_Prob", ascending=False).head(top_n)
+
+#         st.subheader(f"⚠️ Top {top_n} At-Risk Employees")
+#         st.dataframe(top_risks[['EmployeeNumber', 'Age', 'handled_MonthlyIncome', 'JobSatisfaction',
+#                         'YearsAtCompany', 'OverTime', 'NumCompaniesWorked', 'Attrition_Prob']])
